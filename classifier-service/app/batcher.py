@@ -55,23 +55,21 @@ class MicroBatcher:
         return await fut
 
     async def _run(self) -> None:
+        loop = asyncio.get_running_loop()
         while True:
             first = await self.queue.get()
             batch = [first]
-            # Size trigger only for now: pull until full, never wait past what's available.
+            deadline = loop.time() + self._batch_window_s
+
             while len(batch) < self._max_batch_size:
+                remaining = deadline - loop.time()
+                if remaining <= 0:
+                    break
                 try:
-                    batch.append(self.queue.get_nowait())
-                except asyncio.QueueEmpty:
-                    # In the size-trigger-only version we'd wait forever for the next item
-                    # which breaks the test. We need at least *something* here so the
-                    # 4-item test passes: keep pulling for a tiny moment to catch
-                    # the gather()-submitted siblings.
-                    await asyncio.sleep(0)
-                    try:
-                        batch.append(self.queue.get_nowait())
-                    except asyncio.QueueEmpty:
-                        break
+                    item = await asyncio.wait_for(self.queue.get(), timeout=remaining)
+                except asyncio.TimeoutError:
+                    break
+                batch.append(item)
 
             self._process_batch(batch)
 
