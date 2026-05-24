@@ -1,0 +1,102 @@
+{
+  "annotations": {"list": []},
+  "editable": true,
+  "graphTooltip": 1,
+  "panels": [
+    {
+      "id": 1,
+      "type": "timeseries",
+      "title": "Kommentare pro Sekunde",
+      "gridPos": {"x": 0, "y": 0, "w": 12, "h": 8},
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [
+        {"expr": "rate(comments_classified_total[1m])", "refId": "A"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "ops"}, "overrides": []},
+      "options": {"legend": {"displayMode": "list"}}
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "Batches pro Minute",
+      "gridPos": {"x": 12, "y": 0, "w": 12, "h": 8},
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [
+        {"expr": "rate(batches_processed_total[1m]) * 60", "refId": "A"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "short"}, "overrides": []},
+      "options": {"legend": {"displayMode": "list"}}
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "Durchschnittliche Batch-Grösse",
+      "gridPos": {"x": 0, "y": 8, "w": 12, "h": 8},
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [
+        {"expr": "rate(batch_size_sum[1m]) / rate(batch_size_count[1m])", "refId": "A"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "short", "min": 0, "max": 8}, "overrides": []},
+      "options": {"legend": {"displayMode": "list"}}
+    },
+    {
+      "id": 4,
+      "type": "timeseries",
+      "title": "p95 Inference-Latenz",
+      "gridPos": {"x": 12, "y": 8, "w": 12, "h": 8},
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [
+        {"expr": "histogram_quantile(0.95, rate(batch_inference_duration_seconds_bucket[5m]))", "refId": "A"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "s"}, "overrides": []},
+      "options": {"legend": {"displayMode": "list"}}
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "p95 Batch-Wartezeit",
+      "gridPos": {"x": 0, "y": 16, "w": 12, "h": 8},
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [
+        {"expr": "histogram_quantile(0.95, rate(batch_wait_time_seconds_bucket[5m]))", "refId": "A"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "s"}, "overrides": []},
+      "options": {"legend": {"displayMode": "list"}}
+    },
+    {
+      "id": 6,
+      "type": "stat",
+      "title": "Queue-Grösse",
+      "gridPos": {"x": 12, "y": 16, "w": 12, "h": 8},
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [
+        {"expr": "microbatch_queue_size", "refId": "A"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "short"}, "overrides": []},
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}, "graphMode": "area"}
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Kommentare nach Label",
+      "gridPos": {"x": 0, "y": 24, "w": 24, "h": 8},
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [
+        {"expr": "sum by (label) (rate(comments_classified_by_label_total[5m]))",
+         "legendFormat": "{{label}}", "refId": "A"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "ops", "custom": {"stacking": {"mode": "normal"}}}, "overrides": []},
+      "options": {"legend": {"displayMode": "table"}}
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 39,
+  "tags": ["classifier", "nlp"],
+  "templating": {"list": []},
+  "time": {"from": "now-15m", "to": "now"},
+  "timepicker": {},
+  "timezone": "",
+  "title": "NLP Classifier Service",
+  "uid": "classifier-dashboard",
+  "version": 1
+}
