@@ -13,3 +13,9 @@ example_projects_from_lectures/
 
 # Local Python virtualenv
 .venv/
+
+# Python cache and pytest
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
