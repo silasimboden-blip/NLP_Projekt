@@ -10,3 +10,6 @@ example_projects_from_lectures/
 # Assignment brief (kept locally only)
 02_NLP Operations_01_Projektaufgabe.pdf
 02_NLP_Operations_01_Projektaufgabe.md
+
+# Local Python virtualenv
+.venv/
