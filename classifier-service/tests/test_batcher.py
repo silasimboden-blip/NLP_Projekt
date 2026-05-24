@@ -87,3 +87,26 @@ async def test_size_and_time_combined():
     assert len(call_log[0]) == 3
 
     await batcher.stop()
+
+
+async def test_classifier_exception_propagates_to_all_futures():
+    class BrokenClassifier:
+        def classify_batch(self, comments):
+            raise RuntimeError("model is sad")
+
+    batcher = MicroBatcher(
+        classifier=BrokenClassifier(),
+        max_batch_size=4,
+        batch_window_ms=50,
+        max_queue_size=64,
+    )
+    batcher.start()
+
+    tasks = [asyncio.create_task(batcher.submit(f"c{i}")) for i in range(3)]
+    results = await asyncio.gather(*tasks, return_exceptions=True)
+
+    assert len(results) == 3
+    assert all(isinstance(r, RuntimeError) for r in results)
+    assert all(str(r) == "model is sad" for r in results)
+
+    await batcher.stop()
