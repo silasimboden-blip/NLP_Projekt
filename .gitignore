@@ -1,0 +1,12 @@
+# macOS
+.DS_Store
+
+# Claude Code session data
+.claude/
+
+# Lecture reference material (not part of the assignment deliverable)
+example_projects_from_lectures/
+
+# Assignment brief (kept locally only)
+02_NLP Operations_01_Projektaufgabe.pdf
+02_NLP_Operations_01_Projektaufgabe.md
