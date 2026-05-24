@@ -26,11 +26,12 @@ COMMENTS = [text for _, text in SAMPLES]
 async def fire_one(client: httpx.AsyncClient, url: str, comment: str, latencies: list, errors: list):
     t0 = time.perf_counter()
     try:
-        r = await client.post(f"{url}/classify", json={"comment": comment}, timeout=30.0)
+        r = await client.post(f"{url}/classify", json={"comment": comment}, timeout=120.0)
         r.raise_for_status()
         latencies.append(time.perf_counter() - t0)
     except Exception as exc:
-        errors.append(str(exc))
+        # str(exc) is empty for many httpx errors (e.g. ReadTimeout); fall back to type name.
+        errors.append(str(exc) or type(exc).__name__)
 
 
 async def run_burst(client, url, duration, rate, latencies, errors):

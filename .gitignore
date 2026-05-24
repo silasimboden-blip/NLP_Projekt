@@ -22,3 +22,6 @@ __pycache__/
 
 # Superpowers planning artifacts (specs/plans) — keep local only
 docs/superpowers/
+
+# Playwright MCP session artifacts
+.playwright-mcp/
