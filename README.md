@@ -109,6 +109,11 @@ Fehlerpfad: Wirft das Modell eine Exception, wird sie auf *alle* Futures
 des Batches gesetzt, so dass jeder Caller einen sauberen 500er erhält und
 keine Anfrage stillschweigend hängt.
 
+Bewusster Trade-off: Der HF-Pipeline-Aufruf ist synchron und blockiert
+während der Inferenz den Event-Loop. Für eine Single-Process-Demo
+akzeptabel; in einer Produktionsumgebung würde man den Aufruf in
+`loop.run_in_executor(...)` einpacken.
+
 ## Screenshot
 
 Siehe `screenshots/dashboard.png`. Neu erstellt nach einem
@@ -132,6 +137,5 @@ cd classifier-service
 ├── grafana/                 Provisioning + Dashboard JSON
 ├── scripts/                 loadgen.py, sample_comments.py
 ├── screenshots/             dashboard.png
-├── docker-compose.yml
-└── docs/superpowers/        Design-Spec und Implementierungs-Plan
+└── docker-compose.yml
 ```

@@ -46,7 +46,7 @@ app = FastAPI(title="NLP Classifier Service", lifespan=lifespan)
 
 @app.middleware("http")
 async def refresh_queue_gauge(request, call_next):
-    if request.url.path.startswith("/metrics"):
+    if request.url.path.startswith("/metrics") and hasattr(request.app.state, "batcher"):
         QUEUE_SIZE_GAUGE.set(request.app.state.batcher.queue.qsize())
     return await call_next(request)
 
