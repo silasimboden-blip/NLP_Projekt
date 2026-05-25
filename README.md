@@ -166,5 +166,5 @@ Siehe `screenshots/dashboard.png`. Neu erstellt nach einem
 ```
 
 ## Authors
-Thajakan Thirunavukkarasu
+Thajakan Thirunavukkarasu,
 Silas Imboden
