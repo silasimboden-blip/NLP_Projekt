@@ -71,17 +71,24 @@ class MicroBatcher:
                     break
                 batch.append(item)
 
-            self._process_batch(batch)
+            await self._process_batch(batch)
 
-    def _process_batch(self, batch: list[_BatchItem]) -> None:
+    async def _process_batch(self, batch: list[_BatchItem]) -> None:
         now = time.monotonic()
         BATCH_SIZE_HIST.observe(len(batch))
         for item in batch:
             BATCH_WAIT.observe(now - item.enqueued_at)
 
+        loop = asyncio.get_running_loop()
+        comments = [i.comment for i in batch]
         try:
-            with INFERENCE_DURATION.time():
-                results = self._classifier.classify_batch([i.comment for i in batch])
+            # Run the blocking HF pipeline call in a thread-pool executor so
+            # the asyncio event loop stays free to serve /metrics and /healthz.
+            def _infer():
+                with INFERENCE_DURATION.time():
+                    return self._classifier.classify_batch(comments)
+
+            results = await loop.run_in_executor(None, _infer)
         except Exception as exc:
             for item in batch:
                 if not item.future.done():
