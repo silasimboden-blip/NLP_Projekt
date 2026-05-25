@@ -151,7 +151,7 @@ akzeptabel; in einer Produktionsumgebung würde man den Aufruf in
 ## Screenshot
 
 Siehe `screenshots/dashboard.png`. Neu erstellt nach einem
-`scripts/loadgen.py --scenario mixed --duration 120` Lauf bei laufendem Stack.
+`scripts/loadgen.py --scenario burst --duration 60` Lauf bei laufendem Stack.
 
 ## Projektstruktur
 
