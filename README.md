@@ -41,7 +41,8 @@ open http://localhost:3000   # admin / admin
 ## Lasttest fahren
 
 ```bash
-# Size-Trigger demonstrieren: ~25 req/s, Batches füllen sich auf MAX_BATCH_SIZE=8
+# Size-Trigger demonstrieren: 16 gleichzeitige Requests in flight,
+# Batches füllen sich auf MAX_BATCH_SIZE=8
 python scripts/loadgen.py --scenario burst --duration 60
 
 # Time-Trigger demonstrieren: ~3 req/s, Batches sind klein und schliessen nach 200ms
@@ -53,6 +54,14 @@ python scripts/loadgen.py --scenario mixed --duration 120
 
 Im Dashboard zeigt das Panel **Durchschnittliche Batch-Grösse** den
 Unterschied am deutlichsten: bei `burst` nahe 8, bei `trickle` nahe 1.
+
+`burst` ist **concurrency-limitiert**, nicht rate-limitiert: es hält konstant
+`--concurrency` (Default 16) Requests gleichzeitig in flight statt mit fester
+req/s zu feuern. Auf CPU braucht `facebook/bart-large-mnli` ~25–35 s pro Batch
+von 8; eine feste hohe Rate (z. B. 25 req/s) würde die Queue sofort bis
+`MAX_QUEUE_SIZE` fluten und fast alle Requests in den Timeout laufen lassen.
+Mit der Concurrency-Begrenzung bleibt die Queue beschränkt, die Batches füllen
+sich trotzdem auf 8 (Size-Trigger), und kein Request läuft in den Timeout.
 
 ## Konfiguration
 
@@ -72,6 +81,22 @@ Labels:
 - `sachliche Kritik`
 - `Empörung`
 - `Beleidigung oder persönlicher Angriff`
+
+### Hinweis zur Label-Verteilung
+
+Beim Start werden alle vier Label-Counter mit dem Wert 0 initialisiert
+(`COMMENTS_BY_LABEL.labels(...)` im `lifespan`). Dadurch erscheint jedes
+Label im Panel "Kommentare nach Label" — auch eines, das das Modell nie
+vorhersagt. Ohne diese Initialisierung gäbe es für ein nie vergebenes Label
+keine Prometheus-Zeitreihe, und die Linie würde im Dashboard schlicht fehlen.
+
+Konkret: `facebook/bart-large-mnli` ist englisch-trainiert und ordnet deutsche
+Empörungs-Kommentare im Zero-Shot fast nie dem Label `Empörung` zu — die
+Wahrscheinlichkeitsmasse geht an `sachliche Kritik` bzw. `Beleidigung`.
+`Empörung` bleibt deshalb meist eine flache Null-Linie. Das ist eine bekannte
+Zero-Shot-Limitierung des Modells, kein Fehler im Service oder Dashboard. Für
+echte deutsche Klassifikationsqualität wäre ein mehrsprachiges MNLI-Modell
+(z. B. `MoritzLaurer/mDeBERTa-v3-base-mnli-xnli`) nötig.
 
 ## Erklärung der Metriken
 

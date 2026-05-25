@@ -6,8 +6,8 @@ from pydantic import BaseModel, Field
 
 from app.batcher import MicroBatcher
 from app.classifier import build_real_classifier
-from app.config import BATCH_WINDOW_MS, MAX_BATCH_SIZE, MAX_QUEUE_SIZE
-from app.metrics import QUEUE_SIZE_GAUGE
+from app.config import BATCH_WINDOW_MS, CANDIDATE_LABELS, MAX_BATCH_SIZE, MAX_QUEUE_SIZE
+from app.metrics import COMMENTS_BY_LABEL, QUEUE_SIZE_GAUGE
 
 
 # Indirection so tests can swap in a stub classifier before startup.
@@ -35,6 +35,12 @@ async def lifespan(app: FastAPI):
     )
     batcher.start()
     app.state.batcher = batcher
+    # Pre-register every candidate label so its counter series exists at 0
+    # from startup. Without this, a label the model never predicts (e.g.
+    # "Empörung" with facebook/bart-large-mnli) has no time series and is
+    # simply absent from the Grafana panel instead of showing a flat zero line.
+    for label in CANDIDATE_LABELS:
+        COMMENTS_BY_LABEL.labels(label=label)
     try:
         yield
     finally:
