@@ -1,0 +1,20 @@
+# Alle Python-Abhängigkeiten des NLP-Classifier-Projekts.
+#
+# Hinweis: Das Docker-Image installiert aus classifier-service/requirements.txt
+# (Build-Kontext ist ./classifier-service). Diese Datei spiegelt dieselben Pins
+# für die Host-seitige Nutzung (Load-Generator, Tests) und als Gesamtübersicht.
+# Beide Dateien bei Versionswechseln synchron halten.
+
+# --- Classifier-Service Runtime ---
+fastapi==0.115.4
+uvicorn[standard]==0.32.0
+transformers==4.46.2
+torch==2.5.1
+prometheus-client==0.21.0
+
+# --- Load-Generator (scripts/loadgen.py) ---
+httpx==0.27.2
+
+# --- Tests (classifier-service/tests/) ---
+pytest==8.3.3
+pytest-asyncio==0.24.0
