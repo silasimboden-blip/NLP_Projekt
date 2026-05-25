@@ -153,20 +153,11 @@ akzeptabel; in einer Produktionsumgebung würde man den Aufruf in
 Siehe `screenshots/dashboard.png`. Neu erstellt nach einem
 `scripts/loadgen.py --scenario mixed --duration 120` Lauf bei laufendem Stack.
 
-## Tests
-
-```bash
-cd classifier-service
-.venv/bin/pytest -v
-```
-
-14 Tests, kein HF-Download nötig — die Tests verwenden Stub-Klassifikatoren.
-
 ## Projektstruktur
 
 ```
 .
-├── classifier-service/      FastAPI-Service (app/, tests/, Dockerfile)
+├── classifier-service/      FastAPI-Service (app/, Dockerfile)
 ├── prometheus/              prometheus.yml
 ├── grafana/                 Provisioning + Dashboard JSON
 ├── scripts/                 loadgen.py, sample_comments.py

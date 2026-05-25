@@ -1,13 +1,8 @@
-# Alle Python-Abhängigkeiten des NLP-Classifier-Projekts.
+# Host-seitige Python-Abhängigkeiten (ausserhalb von Docker).
 #
-# Hinweis: Das Docker-Image installiert aus classifier-service/requirements.txt
-# (Build-Kontext ist ./classifier-service). Diese Datei spiegelt dieselben Pins
-# für die Host-seitige Nutzung (Load-Generator, Tests) und als Gesamtübersicht.
-# Beide Dateien bei Versionswechseln synchron halten.
+# Der Classifier-Service selbst läuft im Container und installiert seine
+# Abhängigkeiten aus classifier-service/requirements.txt. Diese Datei deckt
+# nur ab, was man auf dem Host braucht, um den Load-Generator auszuführen.
 
 # --- Load-Generator (scripts/loadgen.py) ---
 httpx==0.27.2
-
-# --- Tests (classifier-service/tests/) ---
-pytest==8.3.3
-pytest-asyncio==0.24.0
