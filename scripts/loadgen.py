@@ -3,7 +3,8 @@
 Three scenarios:
   burst   — keeps --concurrency requests in flight (default 16); fills batches
             to MAX_BATCH_SIZE (size trigger) with a bounded queue.
-  trickle — ~3 req/s spaced; ~1 req per 200ms window (time trigger).
+  trickle — one req every ~5s; each alone in its 200ms window (time trigger,
+            batches of 1). Rate is deliberately below CPU inference speed.
   mixed   — alternates 10-req bursts and 1s quiet phases (both triggers).
 """
 
@@ -53,9 +54,12 @@ async def run_burst(client, url, duration, concurrency, latencies, errors):
 
 
 async def run_trickle(client, url, duration, latencies, errors):
-    # ~3 req/s, spaced out — each comment is usually alone in its 200ms
-    # window, so batches contain ~1 item and flush on the time trigger.
-    interval = 1.0 / 3.0
+    # One request every ~5s — slower than single-comment CPU inference (~3.5s)
+    # so the worker drains each batch before the next request arrives. Every
+    # comment is then alone in its 200ms window and flushes on the time trigger
+    # as a batch of 1. (A faster rate just backs the queue up and batches grow
+    # to MAX_BATCH_SIZE, defeating the point of this scenario on CPU.)
+    interval = 5.0
     deadline = time.perf_counter() + duration
     tasks = []
     while time.perf_counter() < deadline:

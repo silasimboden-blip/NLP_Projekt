@@ -45,7 +45,8 @@ open http://localhost:3000   # admin / admin
 # Batches füllen sich auf MAX_BATCH_SIZE=8
 python scripts/loadgen.py --scenario burst --duration 60
 
-# Time-Trigger demonstrieren: ~3 req/s, Batches sind klein und schliessen nach 200ms
+# Time-Trigger demonstrieren: ein Request alle ~5s, jeder Batch hat Grösse 1
+# und schliesst nach Ablauf des 200ms-Zeitfensters
 python scripts/loadgen.py --scenario trickle --duration 60
 
 # Beide Trigger in einem Lauf: 10-Bursts, gefolgt von 1s Pause
@@ -62,6 +63,14 @@ von 8; eine feste hohe Rate (z. B. 25 req/s) würde die Queue sofort bis
 `MAX_QUEUE_SIZE` fluten und fast alle Requests in den Timeout laufen lassen.
 Mit der Concurrency-Begrenzung bleibt die Queue beschränkt, die Batches füllen
 sich trotzdem auf 8 (Size-Trigger), und kein Request läuft in den Timeout.
+
+`trickle` feuert aus demselben Grund nur **einen Request alle ~5 s**. Eine
+einzelne Klassifikation dauert auf CPU ~3,5 s; bei diesem Abstand ist der
+Worker fertig, bevor der nächste Request eintrifft. Jeder Kommentar ist damit
+allein in seinem 200-ms-Fenster und wird als **Batch der Grösse 1 über den
+Time-Trigger** verarbeitet. Eine schnellere Rate (z. B. 3 req/s) würde die
+Queue zustauen, sodass nur der allererste Batch Grösse 1 hätte und alle
+folgenden auf 8 anwachsen — der Time-Trigger wäre dann nicht mehr sichtbar.
 
 ## Konfiguration
 
@@ -164,3 +173,7 @@ cd classifier-service
 ├── screenshots/             dashboard.png
 └── docker-compose.yml
 ```
+
+## Authors
+Thajakan Thirunavukkarasu
+Silas Imboden
